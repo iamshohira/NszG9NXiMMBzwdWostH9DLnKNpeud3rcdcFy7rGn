@@ -23,7 +23,6 @@ def check_password():
         st.text_input(
             "Password", type="password", on_change=password_entered, key="password"
         )
-        st.audio("audio/test.wav", format="audio/wav")
         return False
     elif not st.session_state["password_correct"]:
         # Password not correct, show input + error.
@@ -125,9 +124,9 @@ if check_password():
                     for i, q in enumerate(ex["questions"]):
                         st.write(q["en"])
                 elif ex['type'] == "Listening Comprehension":
-                    with open(os.path.join("audio", f"ex{lesson_index}.mp4"), "rb") as fp:
+                    with open(os.path.join("audio", f"ex{lesson_index}.wav"), "rb") as fp:
                         audio = fp.read()
-                    st.audio(audio, format="audio/mp4")
+                    st.audio(audio, format="audio/wav")
                     story = ex["story"]
                     for i, item in enumerate(ex["items"]):
                         st.radio(f"Q{i+1}: {item['question']['en']}", ["A: "+item["answers"][0]["en"], "B: "+item["answers"][1]["en"]])
