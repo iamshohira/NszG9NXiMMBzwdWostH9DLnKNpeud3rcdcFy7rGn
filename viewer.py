@@ -2,10 +2,20 @@ import streamlit as st
 import json
 import openai, os
 from cryptography.fernet import Fernet
-from st_audiorec import st_audiorec
+# from st_audiorec import st_audiorec
+from audio_recorder_streamlit import audio_recorder
+from tempfile import NamedTemporaryFile
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 st.set_page_config(layout="wide")
+
+def transcribe_audio_to_text(audio_bytes):
+    with NamedTemporaryFile(delete=True, suffix=".wav") as temp_file:
+        temp_file.write(audio_bytes)
+        temp_file.flush()
+        with open(temp_file.name, "rb") as audio_file:
+            response = openai.Audio.transcribe("whisper-1", audio_file, language='en')
+    return response.text
 
 def check_password():
     """Returns `True` if the user had the correct password."""
@@ -170,16 +180,16 @@ if check_password():
                         #     with open("audio.mp3", "rb") as fp:
                         #         transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
                         #     st.session_state['prompt'] = transcript.text
-                        wav_audio_data = st_audiorec()
-                        if wav_audio_data is not None:
+                        wav_audio_data = audio_recorder(pause_threshold=30)
+                        if wav_audio_data:
                             if wav_audio_data != st.session_state.audio:
                                 st.session_state.audio = wav_audio_data
-                                with open("audio.wav", "wb") as fp:
-                                    fp.write(wav_audio_data)
-                                with open("audio.wav", "rb") as fp:
-                                    transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
-                                    print(transcript.text)
-                                st.session_state[f"prompt {ex['type']}"] = transcript.text
+                                # with open("audio.wav", "wb") as fp:
+                                #     fp.write(wav_audio_data)
+                                # with open("audio.wav", "rb") as fp:
+                                #     transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
+                                transcript = transcribe_audio_to_text(wav_audio_data)
+                                st.session_state[f"prompt {ex['type']}"] = transcript
                         with st.form(f"input {ex['type']}", clear_on_submit=False):
                             st.text_area("Your response", key=f"prompt {ex['type']}")
                             gc = st.checkbox("Grammer check", value=True, key=f"gc {ex['type']}")
