@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import openai, os
 from cryptography.fernet import Fernet
-from audiorecorder import audiorecorder
+from st_audiorec import st_audiorec
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 st.set_page_config(layout="wide")
@@ -82,7 +82,7 @@ if "reviews" not in st.session_state:
     st.session_state["reviews"] = {}
 
 if "audio" not in st.session_state:
-    st.session_state["audio"] = b'ID3\x04\x00\x00\x00\x00\x00#TSSE\x00\x00\x00\x0f\x00\x00\x03Lavf59.27.100\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xe38\xc0\x00\x00\x00\x00\x00\x00\x00\x00\x00Info\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\xd8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00Lavc59.37\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd8\x00\x00+\xc6\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    st.session_state["audio"] = None
 
 
 st.title("📖")
@@ -135,7 +135,7 @@ if check_password():
                         st.write(" ".join(["A", "B"][i] for i in ex["answers"]))
                 elif ex['type'] in ["Discussion","Role Play"]:
                     cols = st.columns(2)
-                    with cols[0]:
+                    with cols[1]:
                         if ex['type'] == "Discussion":
                             themes = [i['en'] for i in ex["items"]]
                             theme = st.selectbox("Theme", themes)
@@ -170,11 +170,21 @@ if check_password():
                         #     with open("audio.mp3", "rb") as fp:
                         #         transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
                         #     st.session_state['prompt'] = transcript.text
+                        wav_audio_data = st_audiorec()
+                        if wav_audio_data is not None:
+                            if wav_audio_data != st.session_state.audio:
+                                st.session_state.audio = wav_audio_data
+                                with open("audio.wav", "wb") as fp:
+                                    fp.write(wav_audio_data)
+                                with open("audio.wav", "rb") as fp:
+                                    transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
+                                    print(transcript.text)
+                                st.session_state[f"prompt {ex['type']}"] = transcript.text
                         with st.form(f"input {ex['type']}", clear_on_submit=False):
                             st.text_area("Your response", key=f"prompt {ex['type']}")
                             gc = st.checkbox("Grammer check", value=True, key=f"gc {ex['type']}")
                             submitted = st.form_submit_button("Send")
-                    with cols[1]:
+                    with cols[0]:
                         for msg in st.session_state[f"messages{ex['type'][0]}"]:
                             if msg['role'] == "system":
                                 continue
