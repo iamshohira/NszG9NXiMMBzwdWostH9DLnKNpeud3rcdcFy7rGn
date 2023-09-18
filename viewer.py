@@ -23,6 +23,7 @@ def check_password():
         st.text_input(
             "Password", type="password", on_change=password_entered, key="password"
         )
+        st.audio("audio/test.mp3", format="audio/mp3")
         return False
     elif not st.session_state["password_correct"]:
         # Password not correct, show input + error.
