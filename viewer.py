@@ -161,15 +161,15 @@ if check_password():
                         #         st.info("Recording...")
                         #         container.empty()
                         #         container.button('Stop', type='primary', key=f"stop {ex['type']}")
-                        audio = audiorecorder("Voice input", "Recording...")
-                        audiodata = audio.export().read()
-                        if audiodata != st.session_state.audio:
-                            st.session_state.audio = audiodata
-                            with open("audio.mp3", "wb") as fp:
-                                fp.write(audiodata)
-                            with open("audio.mp3", "rb") as fp:
-                                transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
-                            st.session_state['prompt'] = transcript.text
+                        # audio = audiorecorder("Voice input", "Recording...")
+                        # audiodata = audio.export().read()
+                        # if audiodata != st.session_state.audio:
+                        #     st.session_state.audio = audiodata
+                        #     with open("audio.mp3", "wb") as fp:
+                        #         fp.write(audiodata)
+                        #     with open("audio.mp3", "rb") as fp:
+                        #         transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
+                        #     st.session_state['prompt'] = transcript.text
                         with st.form(f"input {ex['type']}", clear_on_submit=False):
                             st.text_area("Your response", key=f"prompt {ex['type']}")
                             gc = st.checkbox("Grammer check", value=True, key=f"gc {ex['type']}")
