@@ -180,7 +180,7 @@ if check_password():
                         #     with open("audio.mp3", "rb") as fp:
                         #         transcript = openai.Audio.transcribe("whisper-1", fp, language="en")
                         #     st.session_state['prompt'] = transcript.text
-                        wav_audio_data = audio_recorder(pause_threshold=30)
+                        wav_audio_data = audio_recorder(pause_threshold=30,key=f"mic {ex['type']}")
                         if wav_audio_data:
                             if wav_audio_data != st.session_state.audio:
                                 st.session_state.audio = wav_audio_data
