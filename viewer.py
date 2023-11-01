@@ -51,6 +51,12 @@ def grammer_check(text):
     response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=msg)
     return response.choices[0].message.content
 
+def translator(text):
+    prompt = "あなたは英語の教師です。ユーザーが英語話で困っているので英単語や例文を教えてください。"
+    msg = [{"role": "system", "content": prompt}, {"role": "user", "content": text}]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=msg)
+    return response.choices[0].message.content
+
 def reset_message(type="Discussion", question=""):
     if type == "Discussion":
         prompt = f'''You are an English teather. Let's discuss with your student:
@@ -98,6 +104,14 @@ if "audio" not in st.session_state:
 st.title("📖")
 
 if check_password():
+    with st.sidebar:
+        # translator
+        with st.form("translator", clear_on_submit=True):
+            st.subheader("Translator")
+            res = st.text_area("Input")
+            btn = st.form_submit_button("Translate")
+        if btn:
+            st.write(translator(res))        
     # dropdown list for selecting the lesson
     lesson = st.selectbox("Lesson", st.session_state.lessons)
     if lesson:
